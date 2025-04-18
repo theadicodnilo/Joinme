@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Join Me</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js" type="module"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js" type="module"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Base Styles */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        /* Login Form Styles */
+        .login-container {
+            position: relative;
+            z-index: 2;
+            width: 400px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid #ffffff;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            border-radius: 20px;
+            z-index: -1;
+            filter: blur(20px);
+            opacity: 0.5;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+            transform: translateZ(30px);
+        }
+
+        .login-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .login-form {
+            transform-style: preserve-3d;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 25px;
+            transform: translateZ(20px);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            color: #ffffff;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #ffffff;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .input-hint {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 5px;
+        }
+
+        .password-input {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .forgot-link {
+            color: #00ff88;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .login-security {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .attempts-remaining {
+            color: #ff4444;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .verification-message {
+            color: #00ff88;
+            font-size: 0.9rem;
+        }
+
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(0, 0, 0, 0.3);
+            border-top-color: #000;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: #ffffff;
+            color: #000000;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            transform: translateZ(25px);
+        }
+
+        .login-btn.loading {
+            position: relative;
+            pointer-events: none;
+        }
+
+        .login-btn.loading .btn-text {
+            opacity: 0;
+        }
+
+        .login-btn.loading .spinner {
+            display: block;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .login-btn:hover {
+            transform: translateZ(35px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .login-options {
+            margin-top: 20px;
+            text-align: center;
+            transform: translateZ(15px);
+        }
+
+        .login-options a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .login-options a:hover {
+            opacity: 1;
+        }
+
+        .divider {
+            margin: 20px 0;
+            text-align: center;
+            position: relative;
+            transform: translateZ(15px);
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 45%;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .divider::before { left: 0; }
+        .divider::after { right: 0; }
+
+        .social-login {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            transform: translateZ(20px);
+        }
+
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .social-btn i {
+            font-size: 1.2rem;
+        }
+
+        .social-btn.google {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .social-btn.github {
+            background: #333333;
+            color: #ffffff;
+        }
+
+        .social-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        #error-message {
+            color: #ff4444;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            transform: translateZ(20px);
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Welcome Back</h1>
+            <p>Sign in to continue your journey</p>
+        </div>
+        
+        <form class="login-form" id="loginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+                <div class="input-hint">Enter your registered email address</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="password-input">
+                    <input type="password" id="password" name="password" required>
+                    <button type="button" class="toggle-password" id="togglePassword">
+                        <i>👁️</i>
+                    </button>
+                </div>
+                <div class="input-hint">Minimum 8 characters</div>
+            </div>
+
+            <div class="form-options">
+                <label class="remember-me">
+                    <input type="checkbox" id="rememberMe">
+                    <span>Remember me</span>
+                </label>
+                <a href="forgot-password.html" class="forgot-link">Forgot Password?</a>
+            </div>
+
+            <div class="login-security">
+                <div class="attempts-remaining" id="attemptsMessage"></div>
+                <div class="verification-message" id="verificationMessage"></div>
+            </div>
+            
+            <button type="submit" class="login-btn" id="loginBtn">
+                <span class="btn-text">Sign In</span>
+                <div class="spinner"></div>
+            </button>
+            
+            <div id="error-message"></div>
+
+            <div class="divider">or</div>
+
+            <div class="social-login">
+                <button type="button" class="social-btn google" id="googleLogin">
+                    <i class="fab fa-google"></i>
+                    <span>Continue with Google</span>
+                </button>
+                <button type="button" class="social-btn github" id="githubLogin">
+                    <i class="fab fa-github"></i>
+                    <span>Continue with GitHub</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script type="module">
+        // Import Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, GithubAuthProvider, signInWithPopup, fetchSignInMethodsForEmail, linkWithPopup } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBNMwf-hrP2PLvJ6qubXV2ILLjAbcwSbyw",
+            authDomain: "auth-4ac21.firebaseapp.com",
+            projectId: "auth-4ac21",
+            storageBucket: "auth-4ac21.firebasestorage.app",
+            messagingSenderId: "415327194439",
+            appId: "1:415327194439:web:692452c3e77d4da76c1062",
+            measurementId: "G-50YMS5DTY9"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        
+        const MAX_LOGIN_ATTEMPTS = 3;
+        const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
+        let loginAttempts = parseInt(localStorage.getItem('loginAttempts') || '0');
+        let lastAttemptTime = parseInt(localStorage.getItem('lastAttemptTime') || '0');
+
+        // Initialize login form
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('loginBtn');
+        const errorMessage = document.getElementById('error-message');
+        const attemptsMessage = document.getElementById('attemptsMessage');
+        const rememberMe = document.getElementById('rememberMe');
+
+        // Check for remembered email
+        const rememberedEmail = localStorage.getItem('rememberedEmail');
+        if (rememberedEmail) {
+            emailInput.value = rememberedEmail;
+            rememberMe.checked = true;
+        }
+
+        // Password visibility toggle
+        document.getElementById('togglePassword').addEventListener('click', () => {
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+        });
+
+        // Check login attempts
+        function checkLoginAttempts() {
+            const now = Date.now();
+            if (loginAttempts >= MAX_LOGIN_ATTEMPTS && (now - lastAttemptTime) < LOCKOUT_DURATION) {
+                const remainingTime = Math.ceil((LOCKOUT_DURATION - (now - lastAttemptTime)) / 60000);
+                attemptsMessage.textContent = `Account locked. Try again in ${remainingTime} minutes.`;
+                loginBtn.disabled = true;
+                return false;
+            }
+            
+            if ((now - lastAttemptTime) > LOCKOUT_DURATION) {
+                loginAttempts = 0;
+                localStorage.setItem('loginAttempts', '0');
+            }
+            
+            return true;
+        }
+
+        // Form submission
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!checkLoginAttempts()) return;
+
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            
+            // Show loading state
+            loginBtn.classList.add('loading');
+            errorMessage.style.display = 'none';
+
+            try {
+                const result = await signInWithEmailAndPassword(auth, email, password);
+                
+                // Handle remember me
+                if (rememberMe.checked) {
+                    localStorage.setItem('rememberedEmail', email);
+                } else {
+                    localStorage.removeItem('rememberedEmail');
+                }
+
+                // Check email verification
+                if (!result.user.emailVerified) {
+                    document.getElementById('verificationMessage').textContent = 
+                        'Please verify your email address. Resend verification email?';
+                    return;
+                }
+
+                // Reset login attempts on successful login
+                loginAttempts = 0;
+                localStorage.setItem('loginAttempts', '0');
+
+                // Store user session
+                const userProfile = {
+                    uid: result.user.uid,
+                    email: result.user.email,
+                    displayName: result.user.displayName || email.split('@')[0],
+                    photoURL: result.user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(email.split('@')[0])}`,
+                    lastLogin: new Date().toISOString()
+                };
+                localStorage.setItem('userProfile', JSON.stringify(userProfile));
+                
+                // Redirect to dashboard
+                window.location.href = 'dashboard.html';
+
+            } catch (error) {
+                loginAttempts++;
+                lastAttemptTime = Date.now();
+                localStorage.setItem('loginAttempts', loginAttempts.toString());
+                localStorage.setItem('lastAttemptTime', lastAttemptTime.toString());
+
+                errorMessage.style.display = 'block';
+                errorMessage.textContent = error.message;
+                
+                if (loginAttempts < MAX_LOGIN_ATTEMPTS) {
+                    attemptsMessage.textContent = 
+                        `${MAX_LOGIN_ATTEMPTS - loginAttempts} attempts remaining`;
+                }
+            } finally {
+                loginBtn.classList.remove('loading');
+            }
+        });
+
+        // Enhanced social login with error handling
+        async function handleSocialLogin(provider) {
+            try {
+                loginBtn.classList.add('loading');
+                const result = await signInWithPopup(auth, provider);
+                
+                // Successfully signed in
+                window.location.href = 'dashboard.html';
+                
+            } catch (error) {
+                if (error.code === 'auth/account-exists-with-different-credential') {
+                    // Get existing providers for this email
+                    const email = error.customData.email;
+                    const providers = await fetchSignInMethodsForEmail(auth, email);
+                    
+                    errorMessage.style.display = 'block';
+                    errorMessage.innerHTML = `
+                        This email is already registered with ${providers[0]}. 
+                        Please sign in with ${providers[0]} instead, or link your accounts 
+                        in the settings after signing in.
+                        <br><br>
+                        <button onclick="signInWithExistingProvider('${providers[0]}', '${email}')" 
+                            class="login-btn">
+                            Continue with ${providers[0]}
+                        </button>
+                    `;
+                } else {
+                    errorMessage.style.display = 'block';
+                    errorMessage.textContent = error.message;
+                }
+            } finally {
+                loginBtn.classList.remove('loading');
+            }
+        }
+
+        // Add helper function for signing in with existing provider
+        async function signInWithExistingProvider(providerName, email) {
+            try {
+                let provider;
+                switch (providerName) {
+                    case 'google.com':
+                        provider = new GoogleAuthProvider();
+                        break;
+                    case 'github.com':
+                        provider = new GithubAuthProvider();
+                        break;
+                    case 'password':
+                        // Handle email/password case
+                        const password = prompt('Please enter your password to link accounts:');
+                        if (password) {
+                            await signInWithEmailAndPassword(auth, email, password);
+                        }
+                        return;
+                    default:
+                        throw new Error('Unsupported provider');
+                }
+                
+                // Set email to prefill
+                provider.setCustomParameters({
+                    login_hint: email
+                });
+                
+                await signInWithPopup(auth, provider);
+                window.location.href = 'dashboard.html';
+                
+            } catch (error) {
+                errorMessage.style.display = 'block';
+                errorMessage.textContent = error.message;
+            }
+        }
+
+        document.getElementById('googleLogin').addEventListener('click', () => 
+            handleSocialLogin(new GoogleAuthProvider())
+        );
+
+        document.getElementById('githubLogin').addEventListener('click', () => 
+            handleSocialLogin(new GithubAuthProvider())
+        );
+
+        // Check session on page load
+        auth.onAuthStateChanged((user) => {
+            if (user && user.emailVerified) {
+                window.location.href = 'dashboard.html';
+            }
+        });
+
+        // Background Animation
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+        const renderer = new THREE.WebGLRenderer({
+            canvas: document.querySelector('#bg-canvas'),
+            alpha: true,
+            antialias: true
+        });
+
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        camera.position.setZ(50);
+
+        // Create stars
+        function addStar() {
+            const geometry = new THREE.SphereGeometry(0.25, 24, 24);
+            const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const star = new THREE.Mesh(geometry, material);
+
+            const [x, y, z] = Array(3).fill().map(() => THREE.MathUtils.randFloatSpread(500));
+            star.position.set(x, y, z);
+            scene.add(star);
+            return star;
+        }
+
+        const stars = Array(1000).fill().map(addStar);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            stars.forEach(star => {
+                star.rotation.y += 0.001;
+                star.rotation.z += 0.001;
+            });
+            renderer.render(scene, camera);
+        }
+
+        // Handle resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+
+        // 3D effect on form
+        const loginContainer = document.querySelector('.login-container');
+        
+        document.addEventListener('mousemove', (e) => {
+            const { clientX, clientY } = e;
+            const { left, top, width, height } = loginContainer.getBoundingClientRect();
+            
+            const x = (clientX - left - width / 2) / 25;
+            const y = (clientY - top - height / 2) / 25;
+            
+            loginContainer.style.transform = `rotateY(${x}deg) rotateX(${-y}deg)`;
+        });
+
+        document.addEventListener('mouseleave', () => {
+            loginContainer.style.transform = 'rotateY(0) rotateX(0)';
+        });
+    </script>
+</body>
+</html>

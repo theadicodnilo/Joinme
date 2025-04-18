@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Join Me</title>
+    <link href="https://unpkg.com/pattern.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #000000;
+            color: #ffffff;
+        }
+
+        /* About Hero Section */
+        .about-hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        .about-hero h1 {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .about-hero p {
+            font-size: 1.5rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Updated Testimonial Section Styles */
+        .testimonial-section {
+            min-height: 100vh;
+            padding: 100px 0;
+            background: #000;
+            border-top: 1px solid #ffffff;
+        }
+
+        .testimonial-carousel {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .testimonial-slide {
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            padding: 40px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .testimonial-slide.active {
+            display: grid;
+            opacity: 1;
+        }
+
+        .testimonial-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .testimonial-dot {
+            width: 12px;
+            height: 12px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.5;
+        }
+
+        .testimonial-dot.active {
+            background: #ffffff;
+            opacity: 1;
+        }
+
+        /* Founder Section Styles */
+        .founder-section {
+            padding: 100px 0;
+            background: #000000;
+            border-top: 1px solid #ffffff;
+        }
+
+        .founder-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .founder-image {
+            position: relative;
+        }
+
+        .founder-image img {
+            width: 100%;
+            border-radius: 20px;
+            border: 1px solid #ffffff;
+        }
+
+        .founder-content {
+            color: #ffffff;
+        }
+
+        .founder-content h2 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .founder-content p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        /* Company About Section */
+        .company-section {
+            padding: 100px 0;
+            background: #000000;
+            border-top: 1px solid #ffffff;
+        }
+
+        .company-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            padding: 0 20px;
+        }
+
+        .company-card {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid #ffffff;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            color: #ffffff;
+        }
+
+        .company-number {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ffffff, #cccccc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .company-label {
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Customer Reviews Section */
+        .reviews-section {
+            padding: 100px 0;
+            background: #000000;
+            border-top: 1px solid #ffffff;
+        }
+
+        .reviews-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .reviews-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .reviews-header h2 {
+            font-size: 3.5rem;
+            color: #ffffff;
+            font-family: 'Playfair Display', serif;
+            margin-bottom: 20px;
+        }
+
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .review-card {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #ffffff;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .review-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .review-rating {
+            color: #FFD700;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .review-text {
+            color: #ffffff;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .reviewer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .reviewer-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+        }
+
+        .reviewer-info {
+            text-align: left;
+        }
+
+        .reviewer-name {
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .reviewer-title {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        /* Add Space Background Styles */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -1;
+        }
+
+        .section {
+            position: relative;
+            z-index: 2;
+            background: transparent !important;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: -1;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 991px) {
+            .testimonial-wrapper {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .testimonial-quote {
+                font-size: 3.5rem;
+            }
+
+            .testimonial-text {
+                font-size: 2rem;
+            }
+
+            .founder-container {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .company-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .reviews-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .about-hero h1 {
+                font-size: 3rem;
+            }
+
+            .about-hero p {
+                font-size: 1.2rem;
+            }
+
+            .company-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .reviews-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .reviews-header h2 {
+                font-size: 2.5rem;
+            }
+        }
+
+        /* Add Navigation Styles */
+        .menu-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            cursor: pointer;
+            padding: 15px;
+        }
+
+        .menu-btn__burger {
+            width: 30px;
+            height: 3px;
+            background: #ffffff;
+            position: relative;
+            transition: all 0.5s ease-in-out;
+        }
+
+        .menu-btn__burger::before,
+        .menu-btn__burger::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 3px;
+            background: #ffffff;
+            transition: all 0.5s ease-in-out;
+        }
+
+        .menu-btn__burger::before {
+            transform: translateY(-10px);
+        }
+
+        .menu-btn__burger::after {
+            transform: translateY(10px);
+        }
+
+        .menu-btn.open .menu-btn__burger {
+            transform: translateX(-50px);
+            background: transparent;
+        }
+
+        .menu-btn.open .menu-btn__burger::before {
+            transform: rotate(45deg) translate(35px, -35px);
+        }
+
+        .menu-btn.open .menu-btn__burger::after {
+            transform: rotate(-45deg) translate(35px, 35px);
+        }
+
+        .nav-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s ease-in-out;
+            z-index: 1500;
+        }
+
+        .nav-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .nav-links {
+            text-align: center;
+        }
+
+        .nav-links a {
+            display: block;
+            color: #fff;
+            text-decoration: none;
+            font-size: 2.5rem;
+            margin: 20px;
+            padding: 10px;
+            transform: translateY(50px);
+            opacity: 0;
+            transition: all 0.5s ease-in-out;
+        }
+
+        .nav-overlay.open .nav-links a {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .nav-links a:hover {
+            color: #00ff88;
+        }
+
+        /* Update Logo Button Styles */
+        .logo-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            background: #000000;
+            border: 1px solid #ffffff;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .logo-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-button__icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .logo-button__icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .logo-button__text {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 768px) {
+            .logo-button__text {
+                display: none;
+            }
+            
+            .logo-button {
+                padding: 8px;
+            }
+        }
+
+        /* Chatbot Styles */
+        .chatbot {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .chat-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .chat-button:hover {
+            transform: scale(1.1);
+        }
+
+        .chat-window {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #ffffff;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-window.active {
+            display: flex;
+        }
+
+        .chat-header {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-header h3 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .chat-body {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .chat-input {
+            padding: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            outline: none;
+        }
+
+        .chat-input button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            background: #ffffff;
+            color: #000000;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input button:hover {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 10px 15px;
+            border-radius: 15px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .bot-message {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        .user-message {
+            background: #ffffff;
+            color: #000000;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        /* Auth Buttons Styles */
+        .auth-buttons {
+            position: fixed;
+            top: 20px;
+            right: 80px;
+            z-index: 2000;
+            display: flex;
+            gap: 15px;
+        }
+
+        .auth-button {
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .login-btn {
+            background: transparent;
+            border: 2px solid #ffffff;
+            color: #ffffff;
+        }
+
+        .login-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .signup-btn {
+            background: #ffffff;
+            border: 2px solid #ffffff;
+            color: #000000;
+        }
+
+        .signup-btn:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .auth-buttons {
+                right: 70px;
+            }
+
+            .auth-button {
+                padding: 6px 15px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <a href="#" class="logo-button">
+        <div class="logo-button__icon">
+            <img src="https://static.vecteezy.com/system/resources/previews/000/550/535/non_2x/user-icon-vector.jpg" 
+                 alt="logo">
+        </div>
+        <span class="logo-button__text">Join Me</span>
+    </a>
+    
+    <div class="menu-btn">
+        <div class="menu-btn__burger"></div>
+    </div>
+
+    <div class="auth-buttons">
+        <a href="#login" class="auth-button login-btn">Login</a>
+        <a href="#signup" class="auth-button signup-btn">Sign Up</a>
+    </div>
+
+    <div class="nav-overlay">
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="#services">Services</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </div>
+
+    <!-- About Hero Section -->
+    <section class="about-hero">
+        <div class="about-content">
+            <h1>Our Story</h1>
+            <p>We're on a mission to transform human connections and mental well-being through technology and compassion.</p>
+        </div>
+    </section>
+
+    <!-- Founder Section -->
+    <section class="founder-section">
+        <div class="founder-container">
+            <div class="founder-image">
+                <img src="https://static.vecteezy.com/system/resources/previews/049/770/074/non_2x/the-image-depicts-a-professional-character-in-a-suit-sitting-on-a-rocket-and-pointing-forward-symbolizing-innovation-rapid-growth-success-or-taking-a-business-to-the-next-level-free-png.png" alt="Founder">
+            </div>
+            <div class="founder-content">
+                <h2>Meet Our Founder</h2>
+                <p>John Doe started Join Me with a vision to revolutionize how people connect and support each other. With over 15 years of experience in mental health and technology, he's dedicated to making mental well-being support accessible to everyone.</p>
+                <p>Under his leadership, Join Me has grown from a simple idea to a global platform that's helped thousands find the support they need.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Company About Section -->
+    <section class="company-section">
+        <div class="company-grid">
+            <div class="company-card">
+                <div class="company-number">50K+</div>
+                <div class="company-label">Active Users</div>
+            </div>
+            <div class="company-card">
+                <div class="company-number">100+</div>
+                <div class="company-label">Countries</div>
+            </div>
+            <div class="company-card">
+                <div class="company-number">95%</div>
+                <div class="company-label">Satisfaction Rate</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Customer Reviews Section -->
+    <section class="reviews-section">
+        <div class="reviews-container">
+            <div class="reviews-header">
+                <h2>What Our Users Say</h2>
+            </div>
+            <div class="reviews-grid">
+                <div class="review-card">
+                    <div class="review-rating">★★★★★</div>
+                    <p class="review-text">"Join Me has transformed my life. The support and understanding I've received here is beyond anything I could have imagined."</p>
+                    <div class="reviewer">
+                        <img src="https://randomuser.me/api/portraits/women/3.jpg" alt="Reviewer" class="reviewer-avatar">
+                        <div class="reviewer-info">
+                            <div class="reviewer-name">Sarah Johnson</div>
+                            <div class="reviewer-title">Active Member</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="review-card">
+                    <div class="review-rating">★★★★★</div>
+                    <p class="review-text">"The community here is amazing. I've found people who truly understand and support my journey. It's been life-changing."</p>
+                    <div class="reviewer">
+                        <img src="https://randomuser.me/api/portraits/men/4.jpg" alt="Reviewer" class="reviewer-avatar">
+                        <div class="reviewer-info">
+                            <div class="reviewer-name">Michael Chen</div>
+                            <div class="reviewer-title">Premium Member</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="review-card">
+                    <div class="review-rating">★★★★★</div>
+                    <p class="review-text">"24/7 support, compassionate listeners, and a platform that actually cares about mental well-being. Simply outstanding!"</p>
+                    <div class="reviewer">
+                        <img src="https://randomuser.me/api/portraits/women/5.jpg" alt="Reviewer" class="reviewer-avatar">
+                        <div class="reviewer-info">
+                            <div class="reviewer-name">Emily Parker</div>
+                            <div class="reviewer-title">Community Leader</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Updated Testimonial Section -->
+    <section class="testimonial-section">
+        <div class="testimonial-carousel">
+            <div class="testimonial-slide active" data-slide="1">
+                <div class="testimonial-quote-wrapper">
+                    <h1 class="testimonial-quote">Client<br>Stories</h1>
+                </div>
+                <div class="testimonial-content">
+                    <h4 class="testimonial-number">01</h4>
+                    <h2 class="testimonial-text">Transformative Experience with<br><b>Join Me</b></h2>
+                    <p class="testimonial-description">The platform has completely changed how I connect with others. The support and understanding I've found here is incredible.</p>
+                </div>
+            </div>
+
+            <div class="testimonial-slide" data-slide="2">
+                <div class="testimonial-quote-wrapper">
+                    <h1 class="testimonial-quote">User<br>Reviews</h1>
+                </div>
+                <div class="testimonial-content">
+                    <h4 class="testimonial-number">02</h4>
+                    <h2 class="testimonial-text">Life-Changing Support<br><b>System</b></h2>
+                    <p class="testimonial-description">Join Me has provided me with a community that truly understands and supports my journey. It's been transformative.</p>
+                </div>
+            </div>
+
+            <div class="testimonial-slide" data-slide="3">
+                <div class="testimonial-quote-wrapper">
+                    <h1 class="testimonial-quote">Success<br>Stories</h1>
+                </div>
+                <div class="testimonial-content">
+                    <h4 class="testimonial-number">03</h4>
+                    <h2 class="testimonial-text">Building Connections<br><b>That Last</b></h2>
+                    <p class="testimonial-description">Through Join Me, I've found genuine connections and built relationships that have positively impacted my life.</p>
+                </div>
+            </div>
+
+            <div class="testimonial-controls">
+                <span class="testimonial-dot active" data-slide="1"></span>
+                <span class="testimonial-dot" data-slide="2"></span>
+                <span class="testimonial-dot" data-slide="3"></span>
+            </div>
+        </div>
+    </section>
+
+    <div class="chatbot">
+        <button class="chat-button" id="chatButton">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+            </svg>
+        </button>
+        <div class="chat-window" id="chatWindow">
+            <div class="chat-header">
+                <h3>Join Me Assistant</h3>
+            </div>
+            <div class="chat-body" id="chatBody">
+                <div class="message bot-message">
+                    Hello! How can I help you today?
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chatInput" placeholder="Type your message...">
+                <button id="sendMessage">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add any additional JavaScript functionality here
+
+        // Testimonial Carousel
+        const testimonialDots = document.querySelectorAll('.testimonial-dot');
+        const testimonialSlides = document.querySelectorAll('.testimonial-slide');
+        let currentSlide = 0;
+
+        function showSlide(index) {
+            testimonialSlides.forEach((slide, i) => {
+                slide.classList.remove('active');
+                testimonialDots[i].classList.remove('active');
+            });
+            testimonialSlides[index].classList.add('active');
+            testimonialDots[index].classList.add('active');
+        }
+
+        testimonialDots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                currentSlide = index;
+                showSlide(currentSlide);
+            });
+        });
+
+        // Auto-advance slides every 5 seconds
+        setInterval(() => {
+            currentSlide = (currentSlide + 1) % testimonialSlides.length;
+            showSlide(currentSlide);
+        }, 5000);
+
+        // Space Background Animation
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+        const renderer = new THREE.WebGLRenderer({
+            canvas: document.querySelector('#bg-canvas'),
+            alpha: true,
+            antialias: true
+        });
+
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        camera.position.setZ(50);
+
+        // Create stars
+        function addStar() {
+            const geometry = new THREE.SphereGeometry(0.25, 24, 24);
+            const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const star = new THREE.Mesh(geometry, material);
+
+            const [x, y, z] = Array(3).fill().map(() => THREE.MathUtils.randFloatSpread(500));
+            star.position.set(x, y, z);
+            scene.add(star);
+            return star;
+        }
+
+        const stars = Array(1000).fill().map(addStar);
+
+        // Create galaxy dust
+        const dustGeometry = new THREE.BufferGeometry();
+        const dustCount = 5000;
+        const posArray = new Float32Array(dustCount * 3);
+        const colors = new Float32Array(dustCount * 3);
+
+        for(let i = 0; i < dustCount * 3; i += 3) {
+            const radius = THREE.MathUtils.randFloat(20, 100);
+            const spinAngle = THREE.MathUtils.randFloat(0, Math.PI * 2);
+            const branchAngle = ((i % 6) / 3) * Math.PI * 2;
+
+            posArray[i] = Math.cos(branchAngle + spinAngle) * radius;
+            posArray[i + 1] = THREE.MathUtils.randFloatSpread(20);
+            posArray[i + 2] = Math.sin(branchAngle + spinAngle) * radius;
+
+            colors[i] = THREE.MathUtils.randFloat(0.5, 1);
+            colors[i + 1] = THREE.MathUtils.randFloat(0, 0.5);
+            colors[i + 2] = THREE.MathUtils.randFloat(0.5, 1);
+        }
+
+        dustGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        dustGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+        const dustMaterial = new THREE.PointsMaterial({
+            size: 0.5,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending
+        });
+
+        const dust = new THREE.Points(dustGeometry, dustMaterial);
+        scene.add(dust);
+
+        // Create central glow
+        const glowGeometry = new THREE.SphereGeometry(10, 32, 32);
+        const glowMaterial = new THREE.MeshBasicMaterial({
+            color: 0x6633ff,
+            transparent: true,
+            opacity: 0.15
+        });
+        const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+        scene.add(glow);
+
+        // Mouse interaction
+        let mouseX = 0;
+        let mouseY = 0;
+
+        document.addEventListener('mousemove', (event) => {
+            mouseX = event.clientX - window.innerWidth / 2;
+            mouseY = event.clientY - window.innerHeight / 2;
+        });
+
+        // Animation
+        function animate() {
+            requestAnimationFrame(animate);
+
+            dust.rotation.y += 0.0005;
+            glow.rotation.y += 0.0003;
+
+            stars.forEach(star => {
+                star.rotation.y += 0.001;
+                star.rotation.z += 0.001;
+            });
+
+            dust.rotation.x += (mouseY * 0.000002);
+            dust.rotation.y += (mouseX * 0.000002);
+
+            renderer.render(scene, camera);
+        }
+
+        // Handle resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+
+        // Add Menu Button Script
+        const menuBtn = document.querySelector('.menu-btn');
+        const navOverlay = document.querySelector('.nav-overlay');
+        let menuOpen = false;
+
+        menuBtn.addEventListener('click', () => {
+            if(!menuOpen) {
+                menuBtn.classList.add('open');
+                navOverlay.classList.add('open');
+                menuOpen = true;
+            } else {
+                menuBtn.classList.remove('open');
+                navOverlay.classList.remove('open');
+                menuOpen = false;
+            }
+        });
+
+        // Chatbot functionality
+        const chatButton = document.getElementById('chatButton');
+        const chatWindow = document.getElementById('chatWindow');
+        const chatInput = document.getElementById('chatInput');
+        const chatBody = document.getElementById('chatBody');
+        const sendButton = document.getElementById('sendMessage');
+
+        chatButton.addEventListener('click', () => {
+            chatWindow.classList.toggle('active');
+        });
+
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (message) {
+                // Add user message
+                addMessage(message, 'user-message');
+                
+                // Simulate bot response
+                setTimeout(() => {
+                    const botResponse = "Thanks for your message! Our team will get back to you soon.";
+                    addMessage(botResponse, 'bot-message');
+                }, 1000);
+
+                chatInput.value = '';
+            }
+        }
+
+        function addMessage(text, className) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${className}`;
+            messageDiv.textContent = text;
+            chatBody.appendChild(messageDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        sendButton.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

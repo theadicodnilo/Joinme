@@ -1,0 +1,2503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Me </title>
+    <link href="https://unpkg.com/pattern.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+            background-color: #000000;
+            display: block; /* Remove grid display from body */
+        }
+
+        .menu-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            cursor: pointer;
+            padding: 15px;
+        }
+
+        .menu-btn__burger {
+            width: 30px;
+            height: 3px;
+            background: #333;
+            position: relative;
+            transition: all 0.5s ease-in-out;
+        }
+
+        .menu-btn__burger::before,
+        .menu-btn__burger::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 3px;
+            background: #333;
+            transition: all 0.5s ease-in-out;
+        }
+
+        .menu-btn__burger::before {
+            transform: translateY(-10px);
+        }
+
+        .menu-btn__burger::after {
+            transform: translateY(10px);
+        }
+
+        .menu-btn.open .menu-btn__burger {
+            transform: translateX(-50px);
+            background: transparent;
+        }
+
+        .menu-btn.open .menu-btn__burger::before {
+            transform: rotate(45deg) translate(35px, -35px);
+        }
+
+        .menu-btn.open .menu-btn__burger::after {
+            transform: rotate(-45deg) translate(35px, 35px);
+        }
+
+        .nav-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s ease-in-out;
+            z-index: 1500;
+        }
+
+        .nav-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .nav-links {
+            text-align: center;
+        }
+
+        .nav-links a {
+            display: block;
+            color: #fff;
+            text-decoration: none;
+            font-size: 2.5rem;
+            margin: 20px;
+            padding: 10px;
+            transform: translateY(50px);
+            opacity: 0;
+            transition: all 0.5s ease-in-out;
+        }
+
+        .nav-overlay.open .nav-links a {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .nav-links a:hover {
+            color: #00ff88;
+        }
+
+        /* 3D Carousel Styles */
+        .carousel-section {
+            min-height: 100vh;
+            width: 100%;
+            position: relative;
+            background: #000000;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 0;
+        }
+
+        .carousel-wrapper {
+            height: 600px;
+            background-color: #000000;
+            width: 100%;
+            display: grid;
+            grid-template-rows: 500px 100px;
+            grid-template-columns: 1fr 30px 30px 30px 30px 30px 1fr;
+            align-items: center;
+            justify-items: center;
+        }
+
+        main#carousel {
+            grid-row: 1 / 2;
+            grid-column: 1 / 8;
+            width: 100vw;
+            height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            perspective: 600px;
+            --items: 5;
+            --middle: 3;
+            --position: 1;
+            pointer-events: none;
+        }
+
+        div.item {
+            position: absolute;
+            width: 1500px;
+            height: 800px;
+            border-radius: 10px;
+            background-color: #000000;
+            border: 1px solid #ffffff;
+            --r: calc(var(--position) - var(--offset));
+            --abs: max(calc(var(--r) * -1), var(--r));
+            transition: all 0.25s linear;
+            transform: rotateY(calc(-10deg * var(--r)))
+                translateX(calc(-300px * var(--r)));
+            z-index: calc((var(--position) - var(--abs)));
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 40px 80px; /* Increased padding for better spacing */
+            color: white;
+        }
+
+        div.item:nth-of-type(1) { 
+            --offset: 1; 
+            background: #000000;
+            border: 1px solid #ffffff;
+        }
+        div.item:nth-of-type(2) { 
+            --offset: 2; 
+            background: #000000;
+            border: 1px solid #ffffff;
+        }
+        div.item:nth-of-type(3) { 
+            --offset: 3; 
+            background: #000000;
+            border: 1px solid #ffffff;
+        }
+        div.item:nth-of-type(4) { 
+            --offset: 4; 
+            background: #000000;
+            border: 1px solid #ffffff;
+        }
+        div.item:nth-of-type(5) { 
+            --offset: 5; 
+            background: #000000;
+            border: 1px solid #ffffff;
+        }
+
+        input:nth-of-type(1) {
+            grid-column: 2 / 3;
+            grid-row: 2 / 3;
+        }
+        input:nth-of-type(1):checked ~ main#carousel {
+            --position: 1;
+        }
+
+        input:nth-of-type(2) {
+            grid-column: 3 / 4;
+            grid-row: 2 / 3;
+        }
+        input:nth-of-type(2):checked ~ main#carousel {
+            --position: 2;
+        }
+
+        input:nth-of-type(3) {
+            grid-column: 4 /5;
+            grid-row: 2 / 3;
+        }
+        input:nth-of-type(3):checked ~ main#carousel {
+            --position: 3;
+        }
+
+        input:nth-of-type(4) {
+            grid-column: 5 / 6;
+            grid-row: 2 / 3;
+        }
+        input:nth-of-type(4):checked ~ main#carousel {
+            --position: 4;
+        }
+
+        input:nth-of-type(5) {
+            grid-column: 6 / 7;
+            grid-row: 2 / 3;
+        }
+        input:nth-of-type(5):checked ~ main#carousel {
+            --position: 5;
+        }
+
+        .carousel-content {
+            max-width: 50%;
+        }
+
+        .carousel-content h2 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .carousel-content p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .carousel-btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #ffffff;
+            border: 2px solid #ffffff;
+            color: #000000;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            text-align: center;
+            min-width: 160px;
+        }
+
+        .carousel-btn:hover {
+            background: #000000;
+            border-color: #ffffff;
+            color: #ffffff;
+        }
+
+        .carousel-image {
+            max-width: 45%;
+            height: 350px; /* Fixed height */
+            object-fit: contain; /* Maintain aspect ratio */
+            object-position: center;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15));
+            transition: transform 0.3s ease;
+        }
+
+        .carousel-image:hover {
+            transform: translateY(-10px);
+        }
+
+        .stats-container {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #ffffff;
+        }
+
+        /* Features Section Styles */
+        .features-section {
+            min-height: 100vh;
+            width: 100%;
+            position: relative;
+            background: #000000;
+            overflow: hidden;
+            padding: 40px 0;
+            border-top: 1px solid #ffffff;
+        }
+
+        .features-container {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 40px 80px;
+        }
+
+        .features-header {
+            text-align: center;
+            margin-bottom: 60px;
+            color: white;
+        }
+
+        .features-title {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #ffffff, #cccccc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            perspective: 1000px;
+        }
+
+        .feature-card {
+            background: #000000;
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            color: white;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid black;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            transform: translateZ(20px);
+            pointer-events: none;
+        }
+
+        .feature-card:hover {
+            transform: rotateX(10deg) rotateY(10deg) translateZ(20px);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: #000000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            transform: translateZ(30px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border: 1px solid #ffffff;
+        }
+
+        .feature-icon svg {
+            width: 40px;
+            height: 40px;
+            color: #ffffff;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+
+        .feature-card h3 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            transform: translateZ(40px);
+        }
+
+        .feature-card p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+            transform: translateZ(30px);
+        }
+
+        @media (max-width: 1200px) {
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .features-container {
+                padding: 20px;
+            }
+        }
+
+        /* App Download Section Styles */
+        .app-section {
+            min-height: 100vh;
+            background: #000000;
+            color: white;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+
+        .app-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .app-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #ffffff, #cccccc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .app-description {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .app-buttons {
+            display: flex;
+            gap: 20px;
+        }
+
+        .store-button {
+            padding: 12px 30px;
+            border-radius: 12px;
+            background: #000000;
+            backdrop-filter: blur(10px);
+            border: 1px solid #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .store-button:hover {
+            background: #000000;
+            border-color: #ffffff;
+            transform: translateY(-3px);
+        }
+
+        .store-button img {
+            height: 24px;
+        }
+
+        .store-button span {
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .app-image {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .device-mockup {
+            width: 45%;
+            max-width: 300px;
+            filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.1));
+        }
+
+        .device-mockup.iphone {
+            transform: perspective(1000px) rotateY(-15deg);
+            animation: floatLeft 6s ease-in-out infinite;
+        }
+
+        .device-mockup.android {
+            width: 200%; /* Increased from 45% */
+            max-width: 350px; /* Increased from 300px */
+            transform: perspective(1000px) rotateY(15deg) scale(1.2); /* Added scale */
+            margin-left: -20px; /* Added negative margin to overlap slightly */
+        }
+
+        @keyframes floatLeft {
+            0%, 100% { 
+                transform: perspective(1000px) rotateY(-15deg) translateY(0);
+                filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.1));
+            }
+            50% { 
+                transform: perspective(1000px) rotateY(-15deg) translateY(-20px);
+                filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.2));
+            }
+        }
+
+        @keyframes floatRight {
+            0%, 100% { 
+                transform: perspective(1000px) rotateY(15deg) translateY(-20px);
+                filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.1));
+            }
+            50% { 
+                transform: perspective(1000px) rotateY(15deg) translateY(0);
+                filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.2));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .app-buttons {
+                justify-content: center;
+            }
+
+            .device-mockup {
+                margin-top: 40px;
+            }
+
+            .device-mockup.android {
+                width: 65%;
+                margin-left: 0;
+            }
+        }
+
+        /* Updated Features Section Styles */
+        .features-section {
+            background: #000000;
+            border-top: 1px solid #000000;
+        }
+
+        .features-title {
+            background: linear-gradient(45deg, #ffffff, #cccccc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .feature-card {
+            background: #000000;
+            border: 1px solid #000000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-icon {
+            background: #000000;
+            border: 1px solid #000000;
+        }
+
+        .feature-icon svg {
+            color: #ffffff;
+        }
+
+        /* Updated App Download Section Styles */
+        .app-section {
+            background: #000000;
+            border-top: 1px solid #000000;
+        }
+
+        .app-title {
+            background: linear-gradient(45deg, #ffffff, #cccccc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .store-button {
+            background: #000000;
+            border: 1px solid #000000;
+            transition: all 0.3s ease;
+        }
+
+        .store-button:hover {
+            background: #000000;
+            border-color: #000000;
+            transform: translateY(-5px);
+        }
+
+        .device-mockup {
+            filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.2));
+        }
+
+        @keyframes float {
+            0%, 100% { 
+                transform: perspective(1000px) rotateY(-15deg) translateY(0);
+                filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.2));
+            }
+            50% { 
+                transform: perspective(1000px) rotateY(-15deg) translateY(-20px);
+                filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.3));
+            }
+        }
+
+        /* Update all backgrounds to pure black */
+        .carousel-section,
+        .features-section,
+        .app-section {
+            background: #000000;
+        }
+
+        div.item {
+            background-color: #000000;
+            border: 1px solid black;
+        }
+
+        .feature-card {
+            background: #000000;
+            border: 1px solid #ffffff;
+        }
+
+        .feature-icon {
+            background: #000000;
+        }
+
+        .store-button {
+            background: #000000;
+        }
+
+        .store-button:hover {
+            background: #000000;
+        }
+
+        /* Remove any remaining gradients */
+        div.item:nth-of-type(1),
+        div.item:nth-of-type(2),
+        div.item:nth-of-type(3),
+        div.item:nth-of-type(4),
+        div.item:nth-of-type(5) {
+            background: #000000;
+        }
+
+        /* Update overlays to use solid black with opacity */
+        .feature-card::before {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-overlay {
+            background: rgba(0, 0, 0, 0.95);
+        }
+
+        /* Logo Button Styles */
+        .logo-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            background: #000000;
+            border: 1px solid #ffffff;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .logo-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-button__icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .logo-button__icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .logo-button__text {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 768px) {
+            .logo-button__text {
+                display: none;
+            }
+            
+            .logo-button {
+                padding: 8px;
+            }
+        }
+
+        /* Global Responsive Styles */
+        @media (max-width: 1400px) {
+            .carousel-content h2 {
+                font-size: 2.5rem;
+            }
+            
+            .features-title,
+            .app-title {
+                font-size: 3rem;
+            }
+            
+            div.item {
+                width: 1200px;
+                padding: 30px 60px;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            div.item {
+                width: 900px;
+                padding: 25px 40px;
+            }
+
+            .carousel-content {
+                max-width: 60%;
+            }
+
+            .carousel-image {
+                max-width: 35%;
+                height: 300px;
+            }
+
+            .device-mockup.android {
+                width: 150%;
+            }
+        }
+
+        @media (max-width: 991px) {
+            div.item {
+                width: 700px;
+                flex-direction: column;
+                height: auto;
+                gap: 30px;
+                padding: 30px;
+            }
+
+            .carousel-content,
+            .carousel-image {
+                max-width: 100%;
+                text-align: center;
+            }
+
+            .stats-container {
+                justify-content: center;
+            }
+
+            .app-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .app-content {
+                text-align: center;
+            }
+
+            .app-buttons {
+                justify-content: center;
+            }
+
+            .app-image {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .device-mockup {
+                width: 60%;
+                margin: 0;
+            }
+
+            .device-mockup.android {
+                width: 70%;
+                transform: none;
+                margin: 0;
+            }
+
+            .carousel-btn {
+                min-width: 140px;
+                padding: 10px 25px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            div.item {
+                width: 90%;
+                padding: 20px;
+            }
+
+            .carousel-content h2 {
+                font-size: 2rem;
+            }
+
+            .carousel-content p {
+                font-size: 1rem;
+            }
+
+            .features-title,
+            .app-title {
+                font-size: 2.5rem;
+            }
+
+            .feature-card {
+                padding: 25px;
+            }
+
+            .feature-card h3 {
+                font-size: 1.5rem;
+            }
+
+            .store-button {
+                padding: 10px 20px;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .app-buttons {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .carousel-btn {
+                width: 80%;
+                max-width: 300px;
+                margin: 0 auto;
+                display: block;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .carousel-content h2 {
+                font-size: 1.75rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .feature-icon {
+                width: 60px;
+                height: 60px;
+            }
+
+            .device-mockup,
+            .device-mockup.android {
+                width: 90%;
+            }
+
+            .carousel-btn {
+                width: 50%;
+                padding: 5px 10px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Fix for very small screens */
+        @media (max-width: 360px) {
+            .carousel-wrapper {
+                height: auto;
+            }
+
+            div.item {
+                padding: 15px;
+            }
+
+            .features-container {
+                padding: 20px 15px;
+            }
+        }
+
+        /* Update Carousel Base Styles */
+        .carousel-section {
+            padding: 10px 0;
+        }
+
+        .carousel-wrapper {
+            height: auto;
+            min-height: 600px;
+            padding: 20px 0;
+        }
+
+        main#carousel {
+            height: auto;
+            min-height: 500px;
+        }
+
+        div.item {
+            width: 90%;
+            max-width: 1500px;
+            height: auto;
+            min-height: 400px;
+            padding: 30px;
+        }
+
+        /* Responsive Carousel Styles */
+        @media (max-width: 1400px) {
+            div.item {
+                padding: 25px;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            div.item {
+                flex-direction: column;
+                padding: 20px;
+                align-items: center;
+                gap: 30px;
+            }
+
+            .carousel-content {
+                max-width: 100%;
+                text-align: center;
+                order: 1;
+            }
+
+            .carousel-image {
+                max-width: 70%;
+                height: 300px;
+                order: 2;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .carousel-wrapper {
+                min-height: 500px;
+            }
+
+            div.item {
+                padding: 15px;
+            }
+
+            .carousel-content h2 {
+                font-size: 2rem;
+            }
+
+            .carousel-content p {
+                font-size: 1rem;
+                margin-bottom: 20px;
+            }
+
+            .carousel-image {
+                max-width: 80%;
+                height: 250px;
+            }
+
+            .stats-container {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .carousel-wrapper {
+                min-height: 400px;
+            }
+
+            div.item {
+                padding: 10px;
+            }
+
+            .carousel-content h2 {
+                font-size: 1.75rem;
+            }
+
+            .carousel-image {
+                max-width: 90%;
+                height: 200px;
+            }
+
+            .stat-item {
+                width: 100%;
+            }
+        }
+
+        .testimonial-section {
+            background: #000000;
+            min-height: 100vh;
+            padding: 60px 0;
+            border-top: 1px solid #ffffff;
+        }
+
+        .testimonial-carousel {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .testimonial-slide {
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            padding: 40px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .testimonial-slide.active {
+            display: grid;
+            opacity: 1;
+        }
+
+        .testimonial-quote {
+            font-size: 4.5rem;
+            font-weight: 900;
+            color: #ffffff;
+            line-height: 1;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .testimonial-content {
+            padding: 30px;
+        }
+
+        .testimonial-number {
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .testimonial-text {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #ffffff;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .testimonial-description {
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            line-height: 1.8;
+        }
+
+        .testimonial-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .testimonial-dot {
+            width: 12px;
+            height: 12px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.5;
+        }
+
+        .testimonial-dot.active {
+            background: #ffffff;
+            opacity: 1;
+        }
+
+        @media (max-width: 991px) {
+            .testimonial-slide {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .testimonial-quote {
+                font-size: 3.5rem;
+            }
+
+            .testimonial-text {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .testimonial-quote {
+                font-size: 3rem;
+            }
+
+            .testimonial-text {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .testimonial-quote {
+                font-size: 2.5rem;
+            }
+
+            .testimonial-text {
+                font-size: 1.5rem;
+            }
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        .section {
+            position: relative;
+            z-index: 2;
+            background: transparent !important;
+        }
+
+        .section::before,
+        .carousel-section::before,
+        .testimonial-section::before,
+        .features-section::before,
+        .app-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: -1;
+        }
+
+        .feature-card,
+        .store-button,
+        div.item {
+            background: rgba(0, 0, 0, 0.5) !important;
+            backdrop-filter: blur(10px);
+        }
+
+        .carousel-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .carousel-control-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .carousel-control-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .carousel-control-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .carousel-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .carousel-progress-bar {
+            height: 100%;
+            background: white;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .carousel-indicators {
+            display: flex;
+            gap: 10px;
+        }
+
+        .carousel-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .carousel-dot.active {
+            background: white;
+        }
+
+        /* Chatbot Styles */
+        .chatbot {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .chat-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .chat-button:hover {
+            transform: scale(1.1);
+        }
+
+        .chat-window {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #ffffff;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-window.active {
+            display: flex;
+        }
+
+        .chat-header {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-header h3 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .chat-body {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .chat-input {
+            padding: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            outline: none;
+        }
+
+        .chat-input button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            background: #ffffff;
+            color: #000000;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input button:hover {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 10px 15px;
+            border-radius: 15px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .bot-message {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        .user-message {
+            background: #ffffff;
+            color: #000000;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        /* Floating Widgets Styles */
+        .floating-widgets {
+            position: fixed;
+            left: 20px;
+            bottom: 20px;
+            z-index: 1000;
+        }
+
+        .widget {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid #ffffff;
+            border-radius: 15px;
+            padding: 15px;
+            color: #ffffff;
+            min-width: 200px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .widget:hover {
+            transform: translateY(-5px);
+        }
+
+        .digital-clock {
+            font-family: 'Courier New', monospace;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        .date-display {
+            font-size: 0.9rem;
+            text-align: center;
+            margin-top: 5px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .floating-widgets {
+                left: 10px;
+                bottom: 90px;
+            }
+
+            .widget {
+                min-width: 150px;
+                padding: 10px;
+            }
+
+            .digital-clock {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Welcome Popup Styles */
+        .welcome-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.7);
+            width: 400px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #ffffff;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            perspective: 1000px;
+            transform-style: preserve-3d;
+        }
+
+        .welcome-popup.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1) rotateX(0deg);
+        }
+
+        .welcome-popup::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            border-radius: 20px;
+            z-index: -1;
+            filter: blur(20px);
+            opacity: 0.5;
+        }
+
+        .popup-content {
+            transform-style: preserve-3d;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .popup-icon {
+            font-size: 50px;
+            margin-bottom: 20px;
+            display: inline-block;
+            transform: translateZ(30px);
+        }
+
+        .popup-title {
+            color: #ffffff;
+            font-size: 2rem;
+            margin-bottom: 15px;
+            font-weight: bold;
+            transform: translateZ(20px);
+        }
+
+        .popup-text {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 25px;
+            line-height: 1.6;
+            transform: translateZ(15px);
+        }
+
+        .popup-button {
+            background: #ffffff;
+            color: #000000;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            transform: translateZ(25px);
+        }
+
+        .popup-button:hover {
+            transform: translateZ(35px) scale(1.1);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) rotateX(0deg) rotateY(0deg);
+            }
+            50% {
+                transform: translateY(-10px) rotateX(5deg) rotateY(5deg);
+            }
+        }
+
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .popup-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Auth Buttons Styles */
+        .auth-buttons {
+            position: fixed;
+            top: 20px;
+            right: 80px;
+            z-index: 2000;
+            display: flex;
+            gap: 15px;
+        }
+
+        .auth-button {
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .login-btn {
+            background: transparent;
+            border: 2px solid #ffffff;
+            color: #ffffff;
+        }
+
+        .login-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .signup-btn {
+            background: #ffffff;
+            border: 2px solid #ffffff;
+            color: #000000;
+        }
+
+        .signup-btn:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .auth-buttons {
+                right: 70px;
+            }
+
+            .auth-button {
+                padding: 6px 15px;
+                font-size: 14px;
+            }
+        }
+
+        .user-menu {
+            position: fixed;
+            top: 20px;
+            right: 80px;
+            z-index: 2000;
+        }
+
+        .user-menu-trigger {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #ffffff;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-menu-trigger:hover {
+            transform: translateY(-2px);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+        }
+
+        .user-menu-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #ffffff;
+            border-radius: 10px;
+            padding: 10px 0;
+            display: none;
+            min-width: 180px;
+        }
+
+        .user-menu:hover .user-menu-dropdown {
+            display: block;
+        }
+
+        .user-menu-dropdown a,
+        .user-menu-dropdown button {
+            display: block;
+            padding: 8px 20px;
+            color: #ffffff;
+            text-decoration: none;
+            text-align: left;
+            width: 100%;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .user-menu-dropdown a:hover,
+        .user-menu-dropdown button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <a href="#" class="logo-button">
+        <div class="logo-button__icon">
+            <img src="https://static.vecteezy.com/system/resources/previews/000/550/535/non_2x/user-icon-vector.jpg" 
+                 alt="logo">
+        </div>
+        <span class="logo-button__text">Join Me</span>
+    </a>
+    
+    <div class="menu-btn">
+        <div class="menu-btn__burger"></div>
+    </div>
+
+    <div class="auth-buttons" id="authButtons">
+        <a href="login.html" class="auth-button login-btn">Login</a>
+        <a href="signup.html" class="auth-button signup-btn">Sign Up</a>
+    </div>
+
+    <div class="user-menu" id="userMenu" style="display: none;">
+        <div class="user-menu-trigger">
+            <img src="" alt="User" id="userAvatar" class="user-avatar">
+            <span id="userName"></span>
+        </div>
+        <div class="user-menu-dropdown">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="#profile">Profile</a>
+            <a href="#settings">Settings</a>
+            <button id="logoutBtn">Logout</button>
+        </div>
+    </div>
+
+    <div class="nav-overlay">
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#about">About</a>
+            <a href="#services">Services</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </div>
+
+    <section class="carousel-section">
+        <div class="carousel-wrapper">
+            <input type="radio" name="position" checked />
+            <input type="radio" name="position" />
+            <input type="radio" name="position" />
+            <input type="radio" name="position" />
+            <input type="radio" name="position" />
+            <main id="carousel">
+                <div class="item">
+                    <div class="carousel-content">
+                        <h2>Join Our Community</h2>
+                        <p>Experience the power of human connection. Start your journey towards better mental well-being today.</p>
+                        <a href="#" class="carousel-btn">Get Started</a>
+                    </div>
+                    <img class="carousel-image" src="https://static.vecteezy.com/system/resources/previews/020/975/865/non_2x/connection-business-3d-illustration-free-png.png" alt="Community">
+                </div>
+
+                <div class="item">
+                    <div class="carousel-content">
+                        <h2>Our Leadership</h2>
+                        <p>Meet our founder and visionary leader who's passionate about mental health and human connection.</p>
+                        <div class="founder-info">
+                            <h3>John Doe</h3>
+                            <p>Founder & CEO</p>
+                        </div>
+                    </div>
+                    <img class="carousel-image" src="https://static.vecteezy.com/system/resources/previews/049/770/074/non_2x/the-image-depicts-a-professional-character-in-a-suit-sitting-on-a-rocket-and-pointing-forward-symbolizing-innovation-rapid-growth-success-or-taking-a-business-to-the-next-level-free-png.png" alt="Founder">
+                </div>
+
+                <div class="item">
+                    <div class="carousel-content">
+                        <h2>Happy Users</h2>
+                        <div class="stats-container">
+                            <div class="stat-item">
+                                <div class="stat-number">10K+</div>
+                                <p>Active Users</p>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">95%</div>
+                                <p>Satisfaction</p>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">24/7</div>
+                                <p>Support</p>
+                            </div>
+                        </div>
+                    </div>
+                    <img class="carousel-image" src="https://static.vecteezy.com/system/resources/previews/056/765/456/non_2x/vibrant-vintage-teamwork-success-celebrating-achievements-together-high-resolution-free-png.png" alt="Happy Users">
+                </div>
+
+                <div class="item">
+                    <div class="carousel-content">
+                        <h2>Our Partners</h2>
+                        <p>Collaborating with leading mental health organizations and technology companies to provide the best support.</p>
+                        <div class="partners-grid">
+                            <!-- Add partner logos here -->
+                        </div>
+                    </div>
+                    <img class="carousel-image" src="https://static.vecteezy.com/system/resources/previews/045/686/485/non_2x/handshake-people-3d-graphic-free-png.png" alt="Partners">
+                </div>
+
+                <div class="item">
+                    <div class="carousel-content">
+                        <h2>Our Impact</h2>
+                        <div class="stats-container">
+                            <div class="stat-item">
+                                <div class="stat-number">50K+</</div>
+                                <p>Lives Improved</p>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">100+</div>
+                                <p>Countries</p>
+                            </div>
+                        </div>
+                    </div>
+                    <img class="carousel-image" src="https://static.vecteezy.com/system/resources/previews/024/072/755/non_2x/illustration-of-a-doctor-holding-a-heart-symbol-world-heart-day-free-png.png" alt="Impact">
+                </div>
+            </main>
+        </div>
+        <div class="carousel-controls">
+            <button class="carousel-control-btn" id="prevBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            
+            <button class="carousel-control-btn" id="playPauseBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" id="playPauseIcon">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6"/>
+                </svg>
+            </button>
+            
+            <button class="carousel-control-btn" id="nextBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </button>
+        
+            <div class="carousel-indicators">
+                <span class="carousel-dot active" data-slide="1"></span>
+                <span class="carousel-dot" data-slide="2"></span>
+                <span class="carousel-dot" data-slide="3"></span>
+                <span class="carousel-dot" data-slide="4"></span>
+                <span class="carousel-dot" data-slide="5"></span>
+            </div>
+        </div>
+        
+        <div class="carousel-progress">
+            <div class="carousel-progress-bar"></div>
+        </div>
+    </section>
+
+    <section class="testimonial-section">
+        <div class="testimonial-carousel">
+            <div class="testimonial-slide active" data-slide="1">
+                <div class="testimonial-quote-wrapper">
+                    <h1 class="testimonial-quote">Client<br>Stories</h1>
+                </div>
+                <div class="testimonial-content">
+                    <h4 class="testimonial-number">01</h4>
+                    <h2 class="testimonial-text">Transformative Experience with<br><b>Join Me</b></h2>
+                    <p class="testimonial-description">The platform has completely changed how I connect with others. The support and understanding I've found here is incredible.</p>
+                </div>
+            </div>
+
+            <div class="testimonial-slide" data-slide="2">
+                <div class="testimonial-quote-wrapper">
+                    <h1 class="testimonial-quote">User<br>Reviews</h1>
+                </div>
+                <div class="testimonial-content">
+                    <h4 class="testimonial-number">02</h4>
+                    <h2 class="testimonial-text">Life-Changing Support<br><b>System</b></h2>
+                    <p class="testimonial-description">Join Me has provided me with a community that truly understands and supports my journey. It's been transformative.</p>
+                </div>
+            </div>
+
+            <div class="testimonial-slide" data-slide="3">
+                <div class="testimonial-quote-wrapper">
+                    <h1 class="testimonial-quote">Success<br>Stories</h1>
+                </div>
+                <div class="testimonial-content">
+                    <h4 class="testimonial-number">03</h4>
+                    <h2 class="testimonial-text">Building Connections<br><b>That Last</b></h2>
+                    <p class="testimonial-description">Through Join Me, I've found genuine connections and built relationships that have positively impacted my life.</p>
+                </div>
+            </div>
+
+            <div class="testimonial-controls">
+                <span class="testimonial-dot active" data-slide="1"></span>
+                <span class="testimonial-dot" data-slide="2"></span>
+                <span class="testimonial-dot" data-slide="3"></span>
+            </div>
+        </div>
+    </section>
+
+    <section class="features-section">
+        <div class="features-container">
+            <div class="features-header">
+                <h2 class="features-title">Our Features</h2>
+                <p>Experience seamless connection and support through our innovative platform</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        </svg>
+                    </div>
+                    <h3>Real Connection</h3>
+                    <p>Connect instantly with compassionate listeners who understand your journey.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                    </div>
+                    <h3>Private & Secure</h3>
+                    <p>Your privacy matters. All conversations are end-to-end encrypted and completely confidential.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <h3>24/7 Support</h3>
+                    <p>Access immediate support anytime, anywhere. We're here when you need us most.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="app-section">
+        <div class="app-container">
+            <div class="app-content">
+                <h2 class="app-title">Download Our App</h2>
+                <p class="app-description">
+                    Take the power of human connection with you wherever you go. 
+                    Our mobile app provides instant access to compassionate listeners 
+                    and supportive communities.
+                </p>
+                <div class="app-buttons">
+                    <a href="#" class="store-button">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/App_Store_%28iOS%29.svg/2048px-App_Store_%28iOS%29.svg.png" alt="App Store">
+                        <span>Download on<br><strong>App Store</strong></span>
+                    </a>
+                    <a href="#" class="store-button">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Google_Play_Arrow_logo.svg/1024px-Google_Play_Arrow_logo.svg.png" alt="Play Store">
+                        <span>Get it on<br><strong>Google Play</strong></span>
+                    </a>
+                </div>
+            </div>
+            <div class="app-image">
+                <img class="device-mockup iphone" src="https://www.pngmart.com/files/Android-Phone-PNG-Pic.png" alt="iPhone App Preview">
+            </div>
+        </div>
+    </section>
+
+    <div class="chatbot">
+        <button class="chat-button" id="chatButton">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+            </svg>
+        </button>
+        <div class="chat-window" id="chatWindow">
+            <div class="chat-header">
+                <h3>Join Me Assistant</h3>
+            </div>
+            <div class="chat-body" id="chatBody">
+                <div class="message bot-message">
+                    Hello! How can I help you today?
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chatInput" placeholder="Type your message...">
+                <button id="sendMessage">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="floating-widgets">
+        <div class="widget">
+            <div class="digital-clock" id="digitalClock">00:00:00</div>
+            <div class="date-display" id="dateDisplay">Loading...</div>
+        </div>
+    </div>
+
+    <div class="popup-overlay" id="popupOverlay"></div>
+    <div class="welcome-popup" id="welcomePopup">
+        <div class="popup-content">
+            <div class="popup-icon">👋</div>
+            <h2 class="popup-title">Welcome to Join Me!</h2>
+            <p class="popup-text">Ready to start your journey towards better connections and mental well-being? We're here to support you every step of the way.</p>
+            <button class="popup-button" id="popupClose">Get Started</button>
+        </div>
+    </div>
+
+    <script>
+        const menuBtn = document.querySelector('.menu-btn');
+        const navOverlay = document.querySelector('.nav-overlay');
+        let menuOpen = false;
+
+        menuBtn.addEventListener('click', () => {
+            if(!menuOpen) {
+                menuBtn.classList.add('open');
+                navOverlay.classList.add('open');
+                menuOpen = true;
+            } else {
+                menuBtn.classList.remove('open');
+                navOverlay.classList.remove('open');
+                menuOpen = false;
+            }
+        });
+
+        // Testimonial Carousel
+        const testimonialDots = document.querySelectorAll('.testimonial-dot');
+        const testimonialSlides = document.querySelectorAll('.testimonial-slide');
+
+        testimonialDots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                const slideNumber = dot.getAttribute('data-slide');
+                
+                // Update dots
+                testimonialDots.forEach(d => d.classList.remove('active'));
+                dot.classList.add('active');
+                
+                // Update slides
+                testimonialSlides.forEach(slide => {
+                    slide.classList.remove('active');
+                    if(slide.getAttribute('data-slide') === slideNumber) {
+                        slide.classList.add('active');
+                    }
+                });
+            });
+        });
+
+        // Auto-advance slides every 5 seconds
+        let currentSlide = 1;
+        setInterval(() => {
+            currentSlide = currentSlide % 3 + 1;
+            document.querySelector(`.testimonial-dot[data-slide="${currentSlide}"]`).click();
+        }, 5000);
+
+        // Background Animation
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+        const renderer = new THREE.WebGLRenderer({
+            canvas: document.querySelector('#bg-canvas'),
+            alpha: true,
+            antialias: true
+        });
+
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        camera.position.setZ(50);
+
+        // Create stars
+        function addStar() {
+            const geometry = new THREE.SphereGeometry(0.25, 24, 24);
+            const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const star = new THREE.Mesh(geometry, material);
+
+            const [x, y, z] = Array(3).fill().map(() => THREE.MathUtils.randFloatSpread(500));
+            star.position.set(x, y, z);
+            scene.add(star);
+            return star;
+        }
+
+        const stars = Array(1000).fill().map(addStar);
+
+        // Create galaxy dust
+        const dustGeometry = new THREE.BufferGeometry();
+        const dustCount = 5000;
+        const posArray = new Float32Array(dustCount * 3);
+        const colors = new Float32Array(dustCount * 3);
+
+        for(let i = 0; i < dustCount * 3; i += 3) {
+            // Spiral pattern
+            const radius = THREE.MathUtils.randFloat(20, 100);
+            const spinAngle = THREE.MathUtils.randFloat(0, Math.PI * 2);
+            const branchAngle = ((i % 6) / 3) * Math.PI * 2;
+
+            posArray[i] = Math.cos(branchAngle + spinAngle) * radius;
+            posArray[i + 1] = THREE.MathUtils.randFloatSpread(20);
+            posArray[i + 2] = Math.sin(branchAngle + spinAngle) * radius;
+
+            // Colors (blue to purple to pink)
+            colors[i] = THREE.MathUtils.randFloat(0.5, 1);
+            colors[i + 1] = THREE.MathUtils.randFloat(0, 0.5);
+            colors[i + 2] = THREE.MathUtils.randFloat(0.5, 1);
+        }
+
+        dustGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        dustGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+        const dustMaterial = new THREE.PointsMaterial({
+            size: 0.5,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending
+        });
+
+        const dust = new THREE.Points(dustGeometry, dustMaterial);
+        scene.add(dust);
+
+        // Create central glow
+        const glowGeometry = new THREE.SphereGeometry(10, 32, 32);
+        const glowMaterial = new THREE.MeshBasicMaterial({
+            color: 0x6633ff,
+            transparent: true,
+            opacity: 0.15
+        });
+        const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+        scene.add(glow);
+
+        // Enhanced Animation
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Rotate galaxy
+            dust.rotation.y += 0.0005;
+            glow.rotation.y += 0.0003;
+
+            // Animate stars
+            stars.forEach(star => {
+                star.rotation.y += 0.001;
+                star.rotation.z += 0.001;
+            });
+
+            // Mouse interaction
+            dust.rotation.x += (mouseY * 0.000002);
+            dust.rotation.y += (mouseX * 0.000002);
+
+            renderer.render(scene, camera);
+        }
+
+        // Mouse movement effect
+        let mouseX = 0;
+        let mouseY = 0;
+
+        document.addEventListener('mousemove', (event) => {
+            mouseX = event.clientX - window.innerWidth / 2;
+            mouseY = event.clientY - window.innerHeight / 2;
+        });
+
+        // Handle resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+
+        // Main Carousel Controls
+        const carouselInputs = document.querySelectorAll('input[name="position"]');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const playPauseIcon = document.getElementById('playPauseIcon');
+        const progressBar = document.querySelector('.carousel-progress-bar');
+        const carouselDots = document.querySelectorAll('.carousel-dot');
+
+        let currentPosition = 0;
+        let isPlaying = true;
+        let progressValue = 0;
+        let carouselInterval;
+
+        function updateCarousel(position) {
+            carouselInputs[position].checked = true;
+            carouselDots.forEach(dot => dot.classList.remove('active'));
+            carouselDots[position].classList.add('active');
+            currentPosition = position;
+            resetProgress();
+        }
+
+        function nextSlide() {
+            currentPosition = (currentPosition + 1) % carouselInputs.length;
+            updateCarousel(currentPosition);
+        }
+
+        function prevSlide() {
+            currentPosition = (currentPosition - 1 + carouselInputs.length) % carouselInputs.length;
+            updateCarousel(currentPosition);
+        }
+
+        function togglePlayPause() {
+            isPlaying = !isPlaying;
+            if (isPlaying) {
+                playPauseIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6"/>';
+                startAutoPlay();
+            } else {
+                playPauseIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>';
+                stopAutoPlay();
+            }
+        }
+
+        function updateProgress() {
+            progressValue = (progressValue + 1) % 100;
+            progressBar.style.width = progressValue + '%';
+            if (progressValue === 0) {
+                nextSlide();
+            }
+        }
+
+        function resetProgress() {
+            progressValue = 0;
+            progressBar.style.width = '0%';
+        }
+
+        function startAutoPlay() {
+            carouselInterval = setInterval(updateProgress, 50);
+        }
+
+        function stopAutoPlay() {
+            clearInterval(carouselInterval);
+        }
+
+        // Event Listeners
+        prevBtn.addEventListener('click', () => {
+            prevSlide();
+            if (isPlaying) {
+                stopAutoPlay();
+                startAutoPlay();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            nextSlide();
+            if (isPlaying) {
+                stopAutoPlay();
+                startAutoPlay();
+            }
+        });
+
+        playPauseBtn.addEventListener('click', togglePlayPause);
+
+        carouselDots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                updateCarousel(index);
+                if (isPlaying) {
+                    stopAutoPlay();
+                    startAutoPlay();
+                }
+            });
+        });
+
+        // Start autoplay
+        startAutoPlay();
+
+        // Chatbot functionality
+        const chatButton = document.getElementById('chatButton');
+        const chatWindow = document.getElementById('chatWindow');
+        const chatInput = document.getElementById('chatInput');
+        const chatBody = document.getElementById('chatBody');
+        const sendButton = document.getElementById('sendMessage');
+
+        chatButton.addEventListener('click', () => {
+            chatWindow.classList.toggle('active');
+        });
+
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (message) {
+                // Add user message
+                addMessage(message, 'user-message');
+                
+                // Simulate bot response
+                setTimeout(() => {
+                    const botResponse = "Thanks for your message! Our team will get back to you soon.";
+                    addMessage(botResponse, 'bot-message');
+                }, 1000);
+
+                chatInput.value = '';
+            }
+        }
+
+        function addMessage(text, className) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${className}`;
+            messageDiv.textContent = text;
+            chatBody.appendChild(messageDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        sendButton.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Digital Clock & Date
+        function updateClock() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('en-US', { 
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            const date = now.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+
+            document.getElementById('digitalClock').textContent = time;
+            document.getElementById('dateDisplay').textContent = date;
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Welcome Popup
+        const welcomePopup = document.getElementById('welcomePopup');
+        const popupOverlay = document.getElementById('popupOverlay');
+        const popupClose = document.getElementById('popupClose');
+
+        // Show popup after a short delay
+        setTimeout(() => {
+            welcomePopup.classList.add('active');
+            popupOverlay.classList.add('active');
+        }, 1500);
+
+        // Close popup
+        popupClose.addEventListener('click', () => {
+            welcomePopup.classList.remove('active');
+            popupOverlay.classList.remove('active');
+        });
+
+        // Add 3D effect on mouse move
+        welcomePopup.addEventListener('mousemove', (e) => {
+            const rect = welcomePopup.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const angleX = (y - centerY) / 30;
+            const angleY = (centerX - x) / 30;
+            
+            welcomePopup.style.transform = `translate(-50%, -50%) scale(1) rotateX(${angleX}deg) rotateY(${angleY}deg)`;
+        });
+
+        // Reset transform on mouse leave
+        welcomePopup.addEventListener('mouseleave', () => {
+            welcomePopup.style.transform = 'translate(-50%, -50%) scale(1) rotateX(0deg) rotateY(0deg)';
+        });
+    </script>
+
+    <script type="module">
+        import { auth, onAuthStateChange } from './firebase-config.js';
+        import { signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+
+        const authButtons = document.getElementById('authButtons');
+        const userMenu = document.getElementById('userMenu');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        onAuthStateChange((user) => {
+            if (user) {
+                // User is signed in
+                authButtons.style.display = 'none';
+                userMenu.style.display = 'block';
+                userAvatar.src = user.photoURL || 'path/to/default-avatar.jpg';
+                userName.textContent = user.displayName || user.email;
+            } else {
+                // User is signed out
+                authButtons.style.display = 'flex';
+                userMenu.style.display = 'none';
+            }
+        });
+
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Error signing out:', error);
+            }
+        });
+    </script>
+
+    <script type="module">
+        import { chatService } from './chat-service.js';
+        
+        // Replace the existing sendMessage function with this:
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            if (message) {
+                // Add user message
+                addMessage(message, 'user-message');
+                chatInput.value = '';
+                
+                // Show typing indicator
+                const typingIndicator = document.createElement('div');
+                typingIndicator.className = 'message bot-message typing';
+                typingIndicator.textContent = '...';
+                chatBody.appendChild(typingIndicator);
+                chatBody.scrollTop = chatBody.scrollHeight;
+
+                try {
+                    // Get response from OpenAI
+                    const response = await chatService.sendMessage(message);
+                    
+                    // Remove typing indicator
+                    typingIndicator.remove();
+                    
+                    // Add bot response
+                    addMessage(response, 'bot-message');
+                } catch (error) {
+                    console.error('Chat error:', error);
+                    typingIndicator.remove();
+                    addMessage('I apologize, but I encountered an error. Please try again later.', 'bot-message error');
+                }
+            }
+        }
+
+        // Add this style to your existing styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .message.typing {
+                opacity: 0.7;
+            }
+            .message.error {
+                color: #ff4444;
+            }
+            .bot-message {
+                animation: fadeIn 0.3s ease-in;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+
+    <script type="module">
+        import { createExpertChat } from './expert-chat-service.js';
+        
+        // Initialize expert chat services
+        const expertChats = {
+            emotion: createExpertChat('emotion'),
+            expression: createExpertChat('expression'),
+            mindset: createExpertChat('mindset')
+        };
+
+        // Track conversation history for each expert
+        const conversationHistories = {
+            emotion: [],
+            expression: [],
+            mindset: []
+        };
+
+        async function handleExpertChat(expertType, message) {
+            // Add user message to history
+            conversationHistories[expertType].push({
+                role: 'user',
+                content: message
+            });
+
+            try {
+                // Show typing indicator in appropriate chat window
+                const chatBody = document.querySelector(`#${expertType}ChatBody`);
+                const typingIndicator = document.createElement('div');
+                typingIndicator.className = 'message bot-message typing';
+                typingIndicator.textContent = '...';
+                chatBody.appendChild(typingIndicator);
+
+                // Get response from expert
+                const response = await expertChats[expertType].sendMessage(
+                    message, 
+                    conversationHistories[expertType]
+                );
+
+                // Add bot response to history
+                conversationHistories[expertType].push({
+                    role: 'assistant',
+                    content: response
+                });
+
+                // Remove typing indicator and add response
+                typingIndicator.remove();
+                addMessageToExpertChat(expertType, response, 'bot-message');
+
+                // Trim history if it gets too long (keep last 10 messages)
+                if (conversationHistories[expertType].length > 20) {
+                    conversationHistories[expertType] = conversationHistories[expertType].slice(-20);
+                }
+            } catch (error) {
+                console.error(`${expertType} Expert Chat Error:`, error);
+                addMessageToExpertChat(
+                    expertType,
+                    "I apologize, but I encountered an error. Please try again.",
+                    'bot-message error'
+                );
+            }
+        }
+
+        function addMessageToExpertChat(expertType, text, className) {
+            const chatBody = document.querySelector(`#${expertType}ChatBody`);
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${className}`;
+            messageDiv.textContent = text;
+            chatBody.appendChild(messageDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        // Initialize event listeners for each expert chat
+        ['emotion', 'expression', 'mindset'].forEach(expertType => {
+            const input = document.querySelector(`#${expertType}ChatInput`);
+            const sendBtn = document.querySelector(`#${expertType}SendMessage`);
+            
+            if (input && sendBtn) {
+                const sendMessage = () => {
+                    const message = input.value.trim();
+                    if (message) {
+                        addMessageToExpertChat(expertType, message, 'user-message');
+                        input.value = '';
+                        handleExpertChat(expertType, message);
+                    }
+                };
+
+                sendBtn.addEventListener('click', sendMessage);
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        sendMessage();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
